@@ -50,7 +50,6 @@ function App() {
     if (text) {
       getTranlations();
     }
-    // getTranlations();
   }, [fromLanguage, toLanguage, text]);
 
   const handleClipborad = () => {
