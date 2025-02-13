@@ -23,14 +23,43 @@ function App() {
     handleSetResult,
   } = useStore();
 
-  const debouncedValueText = useDebounce(text, 100);
+  const debouncedValueText = useDebounce(text, 0);
+
+  // useEffect(() => {
+  //   if (debouncedValueText === "") return;
+
+  //   const source = axios.CancelToken.source();
+  //   const getTranlations = async () => {
+  //     try {
+  //       const response = await axios.get(
+  //         "https://api.mymemory.translated.net/",
+  //         {
+  //           params: {
+  //             q: debouncedValueText,
+  //             langpair: `${fromLanguage}|${toLanguage}`,
+  //           },
+  //           cancelToken: source.token,
+  //         }
+  //       );
+
+  //       handleSetResult(response.data.responseData.translatedText);
+  //     } catch (error) {
+  //       console.error("Error fetching translations", error);
+  //     }
+  //   };
+  //   if (text) {
+  //     getTranlations();
+  //   }
+  // }, [fromLanguage, toLanguage, text]);
 
   useEffect(() => {
+    console.log("useEffect disparado", { fromLanguage, toLanguage, text });
     if (debouncedValueText === "") return;
 
-    const source = axios.CancelToken.source();
-    const getTranlations = async () => {
+    const controller = new AbortController();
+    const getTranslations = async () => {
       try {
+        console.log("Llamando a axios...");
         const response = await axios.get(
           "https://api.mymemory.translated.net/",
           {
@@ -38,17 +67,17 @@ function App() {
               q: debouncedValueText,
               langpair: `${fromLanguage}|${toLanguage}`,
             },
-            cancelToken: source.token,
+            signal: controller.signal,
           }
         );
-
         handleSetResult(response.data.responseData.translatedText);
       } catch (error) {
         console.error("Error fetching translations", error);
       }
     };
+
     if (text) {
-      getTranlations();
+      getTranslations();
     }
   }, [fromLanguage, toLanguage, text]);
 
